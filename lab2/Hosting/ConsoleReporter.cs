@@ -16,7 +16,7 @@ public class ConsoleReporter
     public void PrintSemesterStart(Semester semester)
     {
         Console.WriteLine();
-        Console.WriteLine($"===== Семестр {semester.Number} =====");
+        Console.WriteLine("===== Начало семестра =====");
         Console.WriteLine($"Стратегия: {_strategy.Name}");
         Console.WriteLine("Правила преподавателей:");
 
@@ -42,14 +42,6 @@ public class ConsoleReporter
         Console.WriteLine();
         Console.WriteLine($"Студент вылетел на {semester.DaysPassed}-й день: прогулял «{Subjects.GetName(semester.ExpelledSubject)}», а там спросили");
         Console.WriteLine("Всё удовольствие за семестр сгорело");
-    }
-
-    public void PrintSemesterFinished(Semester semester)
-    {
-        Console.WriteLine();
-        Console.WriteLine($"Семестр {semester.Number} закончен");
-        Console.WriteLine($"Общее удовольствие за семестр: {semester.TotalPleasure}");
-        Console.WriteLine($"Среднее удовольствие в день: {semester.AveragePleasurePerDay:F2}");
     }
 
     public void PrintStoppedByUser()

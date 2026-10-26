@@ -14,8 +14,8 @@ public class SemesterFactory
         _strategy = strategy;
     }
 
-    public Semester CreateSemester(int number)
+    public Semester CreateSemester()
     {
-        return new Semester(number, _ruleGenerator.CreateForAllSubjects(), _strategy);
+        return new Semester(_ruleGenerator.CreateForAllSubjects(), _strategy);
     }
 }

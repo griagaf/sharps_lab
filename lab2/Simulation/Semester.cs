@@ -6,7 +6,6 @@ namespace Lab2.Simulation;
 
 public class Semester
 {
-    public const int DaysCount = 100;
     public const int PleasureForSkip = 1;
     public const int PleasureForPie = PleasureForSkip;
 
@@ -17,19 +16,16 @@ public class Semester
     // В первый день считается, что вчера никого не спрашивали.
     private bool[] _askedYesterday = new bool[Subjects.Count];
 
-    public Semester(int number, ITeacherRule[] teacherRules, ISkipStrategy strategy)
+    public Semester(ITeacherRule[] teacherRules, ISkipStrategy strategy)
     {
         if (teacherRules.Length != Subjects.Count)
         {
             throw new ArgumentException($"Нужно {Subjects.Count} правил, по одному на предмет");
         }
 
-        Number = number;
         _teacherRules = teacherRules;
         _strategy = strategy;
     }
-
-    public int Number { get; }
 
     public IReadOnlyList<ITeacherRule> TeacherRules => _teacherRules;
 
@@ -41,16 +37,14 @@ public class Semester
 
     public Subject ExpelledSubject { get; private set; }
 
-    public bool IsFinished => IsExpelled || DaysPassed == DaysCount;
-
     public double AveragePleasurePerDay => DaysPassed == 0 ? 0 : (double)TotalPleasure / DaysPassed;
 
     /// <returns>Предметы, которые студент прогулял в этот день.</returns>
     public List<Subject> PlayNextDay()
     {
-        if (IsFinished)
+        if (IsExpelled)
         {
-            throw new InvalidOperationException("Семестр уже закончился");
+            throw new InvalidOperationException("Студент уже вылетел");
         }
 
         int day = DaysPassed + 1;

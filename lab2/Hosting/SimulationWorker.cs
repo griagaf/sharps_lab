@@ -21,7 +21,8 @@ public class SimulationWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Semester semester = StartSemester(1);
+        Semester semester = _semesterFactory.CreateSemester();
+        _reporter.PrintSemesterStart(semester);
 
         using var timer = new PeriodicTimer(DayInterval);
 
@@ -36,19 +37,6 @@ public class SimulationWorker : BackgroundService
                 _lifetime.StopApplication();
                 return;
             }
-
-            if (semester.IsFinished)
-            {
-                _reporter.PrintSemesterFinished(semester);
-                semester = StartSemester(semester.Number + 1);
-            }
         }
-    }
-
-    private Semester StartSemester(int number)
-    {
-        Semester semester = _semesterFactory.CreateSemester(number);
-        _reporter.PrintSemesterStart(semester);
-        return semester;
     }
 }
