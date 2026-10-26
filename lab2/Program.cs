@@ -1,5 +1,9 @@
 using System.Text;
-using Lab2;
+using Lab2.Hosting;
+using Lab2.Randomness;
+using Lab2.Simulation;
+using Lab2.Students;
+using Lab2.Teachers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

@@ -1,4 +1,6 @@
-namespace Lab2;
+using Lab2.Domain;
+
+namespace Lab2.Teachers;
 
 public class CopyYesterdayRule : ITeacherRule
 {

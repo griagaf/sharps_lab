@@ -1,4 +1,7 @@
-namespace Lab2;
+using Lab2.Domain;
+using Lab2.Simulation;
+
+namespace Lab2.Students;
 
 public class StudentHistory : IReadOnlyStudentHistory
 {

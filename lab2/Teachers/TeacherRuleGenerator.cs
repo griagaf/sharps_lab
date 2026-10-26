@@ -1,4 +1,7 @@
-namespace Lab2;
+using Lab2.Domain;
+using Lab2.Randomness;
+
+namespace Lab2.Teachers;
 
 public class TeacherRuleGenerator
 {

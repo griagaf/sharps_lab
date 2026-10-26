@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Hosting;
 
-namespace Lab2;
+namespace Lab2.Hosting;
 
 public class KeyPressWorker : BackgroundService
 {

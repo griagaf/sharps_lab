@@ -1,4 +1,8 @@
-namespace Lab2;
+using Lab2.Domain;
+using Lab2.Simulation;
+using Lab2.Students;
+
+namespace Lab2.Hosting;
 
 public class ConsoleReporter
 {

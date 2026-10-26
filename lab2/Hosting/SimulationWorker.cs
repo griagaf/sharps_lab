@@ -1,6 +1,8 @@
+using Lab2.Domain;
+using Lab2.Simulation;
 using Microsoft.Extensions.Hosting;
 
-namespace Lab2;
+namespace Lab2.Hosting;
 
 public class SimulationWorker : BackgroundService
 {
