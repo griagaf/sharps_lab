@@ -8,17 +8,17 @@ namespace Lab3.Tests.Simulation;
 
 public class SemesterFactoryTests
 {
-    private static Semester CreateSemester(params int[] randomNumbers)
+    private static Semester CreateSemester(int observationDays, params int[] randomNumbers)
     {
         var random = new FakeRandomSource(randomNumbers);
-        var factory = new SemesterFactory(new TeacherRuleGenerator(random), new EvenDaysStrategy());
+        var factory = new SemesterFactory(new TeacherRuleGenerator(random), new EvenDaysStrategy(observationDays));
         return factory.CreateSemester();
     }
 
     [Fact]
     public void CreateSemester_UsesGeneratedRules()
     {
-        Semester semester = CreateSemester(0, 1, 0, 2, 1, 2, 0, 0, 0);
+        Semester semester = CreateSemester(20, 0, 1, 0, 2, 1, 2, 0, 0, 0);
 
         Assert.IsType<RandomRule>(semester.TeacherRules[0]);
         Assert.IsType<CopyYesterdayRule>(semester.TeacherRules[1]);
@@ -31,23 +31,25 @@ public class SemesterFactoryTests
     {
         // 6 нулей: все преподаватели спрашивают случайно, дальше по 6 чисел на день (0 = спросить)
         Semester semester = CreateSemester(
+            1,
             0, 0, 0, 0, 0, 0,
             1, 1, 1, 1, 1, 1,
-            0, 0, 0, 0, 0, 0,
-            1, 1, 0, 1, 1, 1);
+            0, 1, 1, 1, 1, 1,
+            0, 1, 0, 1, 1, 1);
 
-        // день 1: нечётный, прогуливает всё, никого не спросили
+        // день 1: наблюдает, ходит на всё, никого не спросили
         List<Subject> firstDay = semester.PlayNextDay();
-        Assert.Equal(Subjects.Count, firstDay.Count);
-        Assert.Equal(Subjects.Count + 1, semester.TotalPleasure);
+        Assert.Empty(firstDay);
+        Assert.Equal(1, semester.TotalPleasure);
 
-        // день 2: чётный, ходит на всё, поэтому вопросы по всем предметам не страшны
+        // день 2: чётный, ходит на всё, спросили по матану
         List<Subject> secondDay = semester.PlayNextDay();
         Assert.Empty(secondDay);
-        Assert.Equal(Subjects.Count + 1 + 1, semester.TotalPleasure);
+        Assert.Equal(2, semester.TotalPleasure);
 
-        // день 3: снова прогуливает всё, а по дискре спросили
-        semester.PlayNextDay();
+        // день 3: нечётный, идёт только на матан, а спросили ещё и по дискре
+        List<Subject> thirdDay = semester.PlayNextDay();
+        Assert.Equal(new[] { Subject.LinearAlgebra, Subject.DiscreteMath }, thirdDay);
         Assert.True(semester.IsExpelled);
         Assert.Equal(Subject.DiscreteMath, semester.ExpelledSubject);
         Assert.Equal(0, semester.TotalPleasure);
@@ -65,8 +67,8 @@ public class SemesterFactoryTests
             dayNumbers.Add(i % 3 == 0 ? 0 : 1);
         }
 
-        Semester first = CreateSemester(dayNumbers.ToArray());
-        Semester second = CreateSemester(dayNumbers.ToArray());
+        Semester first = CreateSemester(5, dayNumbers.ToArray());
+        Semester second = CreateSemester(5, dayNumbers.ToArray());
 
         for (int day = 1; day <= 40 && !first.IsExpelled; day++)
         {

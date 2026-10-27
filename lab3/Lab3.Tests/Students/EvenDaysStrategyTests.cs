@@ -5,7 +5,10 @@ namespace Lab3.Tests.Students;
 
 public class EvenDaysStrategyTests
 {
-    private readonly EvenDaysStrategy _strategy = new EvenDaysStrategy();
+    private const int ObservationDays = 20;
+    private const int FirstOddDayAfterObservation = ObservationDays + 1;
+
+    private readonly EvenDaysStrategy _strategy = new EvenDaysStrategy(ObservationDays);
 
     // Студент был на всех парах с firstDay по lastDay, спрашивали только по askedSubjects.
     private static void AddDays(StudentHistory history, int firstDay, int lastDay, params Subject[] askedSubjects)
@@ -21,52 +24,92 @@ public class EvenDaysStrategyTests
 
     [Theory]
     [InlineData(1)]
-    [InlineData(3)]
-    [InlineData(15)]
-    [InlineData(99)]
-    public void OddDay_SkipsEverything(int day)
+    [InlineData(7)]
+    [InlineData(ObservationDays)]
+    public void DuringObservation_AttendsEverything(int day)
     {
-        Assert.Equal(Flags.None(), _strategy.DecideDay(day, new StudentHistory()));
+        var history = new StudentHistory();
+        AddDays(history, 1, day - 1);
+
+        Assert.Equal(Flags.All(), _strategy.DecideDay(day, history));
     }
 
     [Theory]
-    [InlineData(2)]
-    [InlineData(4)]
-    [InlineData(16)]
+    [InlineData(ObservationDays + 2)]
     [InlineData(100)]
-    public void EvenDay_AttendsEverything(int day)
+    [InlineData(1000)]
+    public void EvenDayAfterObservation_AttendsEverything(int day)
     {
-        Assert.Equal(Flags.All(), _strategy.DecideDay(day, new StudentHistory()));
+        var history = new StudentHistory();
+        AddDays(history, 1, day - 1);
+
+        Assert.Equal(Flags.All(), _strategy.DecideDay(day, history));
     }
 
     [Fact]
-    public void AlwaysAsked_StillSkipsOddDay()
+    public void OddDay_NeverAsked_SkipsEverything()
     {
         var history = new StudentHistory();
-        AddDays(history, 1, 14, Subjects.All);
+        AddDays(history, 1, ObservationDays);
 
-        Assert.Equal(Flags.None(), _strategy.DecideDay(15, history));
+        Assert.Equal(Flags.None(), _strategy.DecideDay(FirstOddDayAfterObservation, history));
     }
 
     [Fact]
-    public void NeverAsked_StillAttendsEvenDay()
+    public void OddDay_AttendsOnlySubjectsThatWereEverAsked()
     {
         var history = new StudentHistory();
-        AddDays(history, 1, 15);
+        AddDays(history, 1, 2);
+        AddDays(history, 3, 3, Subject.Calculus);
+        AddDays(history, 4, 10);
+        AddDays(history, 11, 11, Subject.English, Subject.Calculus);
+        AddDays(history, 12, 19);
+        AddDays(history, 20, 20, Subject.Physics);
 
-        Assert.Equal(Flags.All(), _strategy.DecideDay(16, history));
+        bool[] decision = _strategy.DecideDay(FirstOddDayAfterObservation, history);
+
+        Assert.Equal(Flags.Only(Subject.Calculus, Subject.Physics, Subject.English), decision);
     }
 
     [Fact]
-    public void SameDay_GivesSameDecision()
+    public void OddDay_AskedLongAgo_IsNotForgotten()
     {
         var history = new StudentHistory();
-        AddDays(history, 1, 5, Subject.LinearAlgebra, Subject.English);
-        var anotherStrategy = new EvenDaysStrategy();
+        AddDays(history, 1, 1, Subject.DiscreteMath);
+        AddDays(history, 2, 998);
 
-        bool[] first = _strategy.DecideDay(6, history);
-        bool[] second = _strategy.DecideDay(6, history);
-        bool[] fromAnotherStrategy = anotherStrategy.DecideDay(6, new StudentHistory());
+        Assert.Equal(Flags.Only(Subject.DiscreteMath), _strategy.DecideDay(999, history));
+    }
+
+    [Fact]
+    public void OddDay_SkippedLesson_IsNotCountedAsAsked()
+    {
+        var history = new StudentHistory();
+        AddDays(history, 1, 4);
+
+        foreach (Subject subject in Subjects.All)
+        {
+            bool attended = subject != Subject.Programming;
+            history.SaveLesson(5, subject, attended, asked: !attended);
+        }
+
+        AddDays(history, 6, ObservationDays);
+
+        bool[] decision = _strategy.DecideDay(FirstOddDayAfterObservation, history);
+
+        Assert.False(decision[(int)Subject.Programming]);
+    }
+
+    [Fact]
+    public void SameHistory_GivesSameDecision()
+    {
+        var history = new StudentHistory();
+        AddDays(history, 1, ObservationDays, Subject.LinearAlgebra, Subject.English);
+        var anotherStrategy = new EvenDaysStrategy(ObservationDays);
+
+        bool[] first = _strategy.DecideDay(FirstOddDayAfterObservation, history);
+        bool[] second = _strategy.DecideDay(FirstOddDayAfterObservation, history);
+        bool[] fromAnotherStrategy = anotherStrategy.DecideDay(FirstOddDayAfterObservation, history);
 
         Assert.Equal(first, second);
         Assert.Equal(first, fromAnotherStrategy);
@@ -76,6 +119,6 @@ public class EvenDaysStrategyTests
     public void DecideDay_ReturnsDecisionForEverySubject()
     {
         Assert.Equal(Subjects.Count, _strategy.DecideDay(1, new StudentHistory()).Length);
-        Assert.Equal(Subjects.Count, _strategy.DecideDay(2, new StudentHistory()).Length);
+        Assert.Equal(Subjects.Count, _strategy.DecideDay(FirstOddDayAfterObservation, new StudentHistory()).Length);
     }
 }
