@@ -16,7 +16,7 @@ HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 builder.Logging.AddFilter("Microsoft", LogLevel.Warning);
 
 builder.Services.AddSingleton<IRandomSource, SystemRandomSource>();
-builder.Services.AddSingleton<ISkipStrategy, SimpleStrategy>();
+builder.Services.AddSingleton<ISkipStrategy, EvenDaysStrategy>();
 builder.Services.AddSingleton<TeacherRuleGenerator>();
 builder.Services.AddSingleton<SemesterFactory>();
 builder.Services.AddSingleton<ConsoleReporter>();

@@ -5,7 +5,7 @@ Console.OutputEncoding = Encoding.UTF8;
 
 var random = new Random();
 ITeacherRule[] teacherRules = TeacherRules.CreateForAllSubjects(random);
-ISkipStrategy strategy = new SimpleStrategy();
+ISkipStrategy strategy = new EvenDaysStrategy();
 
 Console.WriteLine($"Стратегия: {strategy.Name}");
 Console.WriteLine();
