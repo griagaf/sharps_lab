@@ -18,4 +18,10 @@ public class SemesterFactory
     {
         return new Semester(new TeacherRuleGenerator(random).CreateForAllSubjects(), _strategy);
     }
+
+    // Семестр с уже выбранными правилами — например, загруженными из БД.
+    public Semester CreateSemester(ITeacherRule[] teacherRules)
+    {
+        return new Semester(teacherRules, _strategy);
+    }
 }

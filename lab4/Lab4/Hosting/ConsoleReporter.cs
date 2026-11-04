@@ -16,7 +16,9 @@ public class ConsoleReporter
     public void PrintSemesterStart(Semester semester, int semesterId)
     {
         Console.WriteLine();
-        Console.WriteLine($"===== Начало семестра #{semesterId} =====");
+        Console.WriteLine(semester.DaysPassed == 0
+            ? $"===== Начало семестра #{semesterId} ====="
+            : $"===== Продолжаем семестр #{semesterId} с дня {semester.DaysPassed + 1}, удовольствие {semester.TotalPleasure} =====");
         Console.WriteLine($"Стратегия: {_strategy.Name}");
         Console.WriteLine("Правила преподавателей:");
 
@@ -57,10 +59,21 @@ public class ConsoleReporter
         Console.Error.WriteLine($"Ошибка БД: {e.Message}");
     }
 
+    public void PrintUnexpectedError(Exception e)
+    {
+        Console.Error.WriteLine();
+        Console.Error.WriteLine($"Непредвиденная ошибка: {e}");
+    }
+
+    public void PrintNothingToContinue()
+    {
+        Console.Error.WriteLine("Незавершённых семестров нет. Начните новый: --new");
+    }
+
     public void PrintStoppedByUser()
     {
         Console.WriteLine();
-        Console.WriteLine("Остановлено по нажатию клавиши");
+        Console.WriteLine("Остановлено по нажатию клавиши. Продолжить: --continue");
     }
 
     private static string JoinNames(List<Subject> subjects)

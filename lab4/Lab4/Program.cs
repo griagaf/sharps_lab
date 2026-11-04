@@ -12,9 +12,21 @@ using Npgsql;
 
 Console.OutputEncoding = Encoding.UTF8;
 
+StartMode? mode = args switch
+{
+    ["--new"] => StartMode.New,
+    ["--continue"] => StartMode.Continue,
+    _ => null,
+};
+
+if (mode is null)
+{
+    Console.Error.WriteLine("Укажите режим запуска: --new (новый семестр) или --continue (продолжить незавершённый)");
+    return 1;
+}
+
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
 {
-    Args = args,
     // appsettings.json лежит рядом с exe, а запускать могут из любой папки.
     ContentRootPath = AppContext.BaseDirectory,
 });
@@ -43,9 +55,10 @@ builder.Services.AddSingleton(NpgsqlDataSource.Create(connectionString));
 builder.Services.AddSingleton<SemesterRepository>();
 builder.Services.AddSingleton<ISkipStrategy, EvenDaysStrategy>();
 builder.Services.AddSingleton<SemesterFactory>();
+builder.Services.AddSingleton<SemesterService>();
 builder.Services.AddSingleton<ConsoleReporter>();
 
-builder.Services.AddHostedService<SimulationWorker>();
+builder.Services.AddHostedService(services => ActivatorUtilities.CreateInstance<SimulationWorker>(services, mode.Value));
 builder.Services.AddHostedService<KeyPressWorker>();
 
 IHost host = builder.Build();
