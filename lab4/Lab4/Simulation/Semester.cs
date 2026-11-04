@@ -42,8 +42,33 @@ public class Semester
 
     public double AveragePleasurePerDay => DaysPassed == 0 ? 0 : (double)TotalPleasure / DaysPassed;
 
-    /// <returns>Предметы, которые студент прогулял в этот день.</returns>
-    public List<Subject> PlayNextDay()
+    public DayOutcome PlayNextDay()
+    {
+        EnsureNotFinished();
+
+        bool[] goToLesson = DecideDay(DaysPassed + 1);
+        bool[] askedToday = AskAllTeachers();
+
+        return ApplyDay(goToLesson, askedToday);
+    }
+
+    /// <summary>
+    /// Повторяет уже прошедший день по сохранённым решениям студента и ответам преподавателей.
+    /// Ни стратегию, ни преподавателей при этом не спрашивает — так семестр восстанавливается из БД.
+    /// </summary>
+    public DayOutcome ReplayDay(bool[] goToLesson, bool[] askedToday)
+    {
+        EnsureNotFinished();
+
+        if (goToLesson.Length != Subjects.Count || askedToday.Length != Subjects.Count)
+        {
+            throw new ArgumentException($"Нужно по {Subjects.Count} значений, по одному на предмет");
+        }
+
+        return ApplyDay(goToLesson, askedToday);
+    }
+
+    private void EnsureNotFinished()
     {
         if (IsExpelled)
         {
@@ -54,10 +79,11 @@ public class Semester
         {
             throw new InvalidOperationException("Семестр уже закончился");
         }
+    }
 
+    private DayOutcome ApplyDay(bool[] goToLesson, bool[] askedToday)
+    {
         int day = DaysPassed + 1;
-        bool[] goToLesson = DecideDay(day);
-        bool[] askedToday = AskAllTeachers();
         var skippedSubjects = new List<Subject>();
 
         foreach (Subject subject in Subjects.All)
@@ -80,7 +106,7 @@ public class Semester
                 ExpelledSubject = subject;
                 TotalPleasure = 0;
                 DaysPassed = day;
-                return skippedSubjects;
+                return new DayOutcome(day, goToLesson, askedToday, skippedSubjects);
             }
 
             TotalPleasure += PleasureForSkip;
@@ -90,7 +116,7 @@ public class Semester
         DaysPassed = day;
         _askedYesterday = askedToday;
 
-        return skippedSubjects;
+        return new DayOutcome(day, goToLesson, askedToday, skippedSubjects);
     }
 
     private bool[] DecideDay(int day)

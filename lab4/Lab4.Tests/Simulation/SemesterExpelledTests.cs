@@ -110,7 +110,7 @@ public class SemesterExpelledTests
         rules[(int)Subject.Calculus] = ScriptedRule.Always(true);
         var semester = new Semester(rules, new FakeStrategy(Flags.None()));
 
-        List<Subject> skipped = semester.PlayNextDay();
+        List<Subject> skipped = semester.PlayNextDay().SkippedSubjects;
 
         Assert.True(semester.IsExpelled);
         Assert.Equal(Subject.Calculus, semester.ExpelledSubject);

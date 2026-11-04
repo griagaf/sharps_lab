@@ -38,17 +38,17 @@ public class SemesterFactoryTests
             0, 1, 0, 1, 1, 1);
 
         // день 1: наблюдает, ходит на всё, никого не спросили
-        List<Subject> firstDay = semester.PlayNextDay();
+        List<Subject> firstDay = semester.PlayNextDay().SkippedSubjects;
         Assert.Empty(firstDay);
         Assert.Equal(1, semester.TotalPleasure);
 
         // день 2: чётный, ходит на всё, спросили по матану
-        List<Subject> secondDay = semester.PlayNextDay();
+        List<Subject> secondDay = semester.PlayNextDay().SkippedSubjects;
         Assert.Empty(secondDay);
         Assert.Equal(2, semester.TotalPleasure);
 
         // день 3: нечётный, идёт только на матан, а спросили ещё и по дискре
-        List<Subject> thirdDay = semester.PlayNextDay();
+        List<Subject> thirdDay = semester.PlayNextDay().SkippedSubjects;
         Assert.Equal(new[] { Subject.LinearAlgebra, Subject.DiscreteMath }, thirdDay);
         Assert.True(semester.IsExpelled);
         Assert.Equal(Subject.DiscreteMath, semester.ExpelledSubject);
@@ -72,7 +72,7 @@ public class SemesterFactoryTests
 
         for (int day = 1; day <= 40 && !first.IsExpelled; day++)
         {
-            Assert.Equal(first.PlayNextDay(), second.PlayNextDay());
+            Assert.Equal(first.PlayNextDay().SkippedSubjects, second.PlayNextDay().SkippedSubjects);
             Assert.Equal(first.TotalPleasure, second.TotalPleasure);
             Assert.Equal(first.IsExpelled, second.IsExpelled);
         }

@@ -1,4 +1,3 @@
-using Lab4.Domain;
 using Lab4.Simulation;
 using Microsoft.Extensions.Hosting;
 
@@ -28,8 +27,8 @@ public class SimulationWorker : BackgroundService
 
         while (await timer.WaitForNextTickAsync(stoppingToken))
         {
-            List<Subject> skippedSubjects = semester.PlayNextDay();
-            _reporter.PrintDay(semester, skippedSubjects);
+            DayOutcome outcome = semester.PlayNextDay();
+            _reporter.PrintDay(semester, outcome.SkippedSubjects);
 
             if (semester.IsExpelled)
             {

@@ -43,7 +43,7 @@ public class SemesterDayTests
     {
         var semester = new Semester(RulesAskingOnly(), new FakeStrategy(Flags.All()));
 
-        List<Subject> skipped = semester.PlayNextDay();
+        List<Subject> skipped = semester.PlayNextDay().SkippedSubjects;
 
         Assert.Empty(skipped);
         Assert.Equal(Semester.PleasureForPie, semester.TotalPleasure);
@@ -66,7 +66,7 @@ public class SemesterDayTests
     {
         var semester = new Semester(RulesAskingOnly(), new FakeStrategy(Flags.AllExcept(Subject.English)));
 
-        List<Subject> skipped = semester.PlayNextDay();
+        List<Subject> skipped = semester.PlayNextDay().SkippedSubjects;
 
         Assert.Equal(new[] { Subject.English }, skipped);
         Assert.Equal(Semester.PleasureForSkip + Semester.PleasureForPie, semester.TotalPleasure);
