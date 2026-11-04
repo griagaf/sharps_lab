@@ -44,6 +44,13 @@ public class ConsoleReporter
         Console.WriteLine("Всё удовольствие за семестр сгорело");
     }
 
+    public void PrintFinished(Semester semester)
+    {
+        Console.WriteLine();
+        Console.WriteLine($"Семестр окончен: {semester.DaysPassed} дней, удовольствие {semester.TotalPleasure}, " +
+                          $"в среднем за день {semester.AveragePleasurePerDay:F2}");
+    }
+
     public void PrintStoppedByUser()
     {
         Console.WriteLine();

@@ -141,6 +141,22 @@ public class SemesterDayTests
     }
 
     [Fact]
+    public void AfterLastDay_SemesterIsFinished()
+    {
+        var semester = new Semester(RulesAskingOnly(), new FakeStrategy(Flags.All()));
+
+        for (int i = 0; i < Semester.DaysInSemester; i++)
+        {
+            Assert.False(semester.IsFinished);
+            semester.PlayNextDay();
+        }
+
+        Assert.True(semester.IsFinished);
+        Assert.False(semester.IsExpelled);
+        Assert.Throws<InvalidOperationException>(() => semester.PlayNextDay());
+    }
+
+    [Fact]
     public void Constructor_WithWrongNumberOfRules_Throws()
     {
         var rules = new ITeacherRule[] { ScriptedRule.Always(false), ScriptedRule.Always(false) };

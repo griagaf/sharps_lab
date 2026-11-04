@@ -37,6 +37,13 @@ public class SimulationWorker : BackgroundService
                 _lifetime.StopApplication();
                 return;
             }
+
+            if (semester.IsFinished)
+            {
+                _reporter.PrintFinished(semester);
+                _lifetime.StopApplication();
+                return;
+            }
         }
     }
 }

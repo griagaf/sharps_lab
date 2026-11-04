@@ -6,6 +6,7 @@ namespace Lab4.Simulation;
 
 public class Semester
 {
+    public const int DaysInSemester = 100;
     public const int PleasureForSkip = 1;
     public const int PleasureForPie = PleasureForSkip;
 
@@ -37,6 +38,8 @@ public class Semester
 
     public Subject ExpelledSubject { get; private set; }
 
+    public bool IsFinished => IsExpelled || DaysPassed >= DaysInSemester;
+
     public double AveragePleasurePerDay => DaysPassed == 0 ? 0 : (double)TotalPleasure / DaysPassed;
 
     /// <returns>Предметы, которые студент прогулял в этот день.</returns>
@@ -45,6 +48,11 @@ public class Semester
         if (IsExpelled)
         {
             throw new InvalidOperationException("Студент уже вылетел");
+        }
+
+        if (DaysPassed >= DaysInSemester)
+        {
+            throw new InvalidOperationException("Семестр уже закончился");
         }
 
         int day = DaysPassed + 1;
