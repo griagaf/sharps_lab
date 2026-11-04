@@ -4,17 +4,17 @@ namespace Lab4.Teachers;
 
 public class CopyYesterdayRule : ITeacherRule
 {
-    private readonly Subject _subjectA;
-
     public CopyYesterdayRule(Subject subjectA)
     {
-        _subjectA = subjectA;
+        SubjectA = subjectA;
     }
 
-    public string Description => $"спрашивает, если вчера спросили по предмету «{Subjects.GetName(_subjectA)}»";
+    public Subject SubjectA { get; }
+
+    public string Description => $"спрашивает, если вчера спросили по предмету «{Subjects.GetName(SubjectA)}»";
 
     public bool ShouldAsk(bool[] askedYesterday)
     {
-        return askedYesterday[(int)_subjectA];
+        return askedYesterday[(int)SubjectA];
     }
 }

@@ -10,9 +10,8 @@ public class SemesterFactoryTests
 {
     private static Semester CreateSemester(int observationDays, params int[] randomNumbers)
     {
-        var random = new FakeRandomSource(randomNumbers);
-        var factory = new SemesterFactory(new TeacherRuleGenerator(random), new EvenDaysStrategy(observationDays));
-        return factory.CreateSemester();
+        var factory = new SemesterFactory(new EvenDaysStrategy(observationDays));
+        return factory.CreateSemester(new FakeRandomSource(randomNumbers));
     }
 
     [Fact]

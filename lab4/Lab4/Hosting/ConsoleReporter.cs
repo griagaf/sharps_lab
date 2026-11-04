@@ -13,10 +13,10 @@ public class ConsoleReporter
         _strategy = strategy;
     }
 
-    public void PrintSemesterStart(Semester semester)
+    public void PrintSemesterStart(Semester semester, int semesterId)
     {
         Console.WriteLine();
-        Console.WriteLine("===== Начало семестра =====");
+        Console.WriteLine($"===== Начало семестра #{semesterId} =====");
         Console.WriteLine($"Стратегия: {_strategy.Name}");
         Console.WriteLine("Правила преподавателей:");
 
@@ -49,6 +49,12 @@ public class ConsoleReporter
         Console.WriteLine();
         Console.WriteLine($"Семестр окончен: {semester.DaysPassed} дней, удовольствие {semester.TotalPleasure}, " +
                           $"в среднем за день {semester.AveragePleasurePerDay:F2}");
+    }
+
+    public void PrintDatabaseError(Exception e)
+    {
+        Console.Error.WriteLine();
+        Console.Error.WriteLine($"Ошибка БД: {e.Message}");
     }
 
     public void PrintStoppedByUser()

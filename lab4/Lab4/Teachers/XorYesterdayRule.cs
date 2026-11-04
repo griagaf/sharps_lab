@@ -4,9 +4,6 @@ namespace Lab4.Teachers;
 
 public class XorYesterdayRule : ITeacherRule
 {
-    private readonly Subject _subjectA;
-    private readonly Subject _subjectB;
-
     public XorYesterdayRule(Subject subjectA, Subject subjectB)
     {
         if (subjectA == subjectB)
@@ -14,16 +11,20 @@ public class XorYesterdayRule : ITeacherRule
             throw new ArgumentException("Предметы A и Б не должны совпадать");
         }
 
-        _subjectA = subjectA;
-        _subjectB = subjectB;
+        SubjectA = subjectA;
+        SubjectB = subjectB;
     }
 
+    public Subject SubjectA { get; }
+
+    public Subject SubjectB { get; }
+
     public string Description =>
-        $"спрашивает, если вчера спросили ровно по одному из предметов «{Subjects.GetName(_subjectA)}» " +
-        $"и «{Subjects.GetName(_subjectB)}»";
+        $"спрашивает, если вчера спросили ровно по одному из предметов «{Subjects.GetName(SubjectA)}» " +
+        $"и «{Subjects.GetName(SubjectB)}»";
 
     public bool ShouldAsk(bool[] askedYesterday)
     {
-        return askedYesterday[(int)_subjectA] != askedYesterday[(int)_subjectB];
+        return askedYesterday[(int)SubjectA] != askedYesterday[(int)SubjectB];
     }
 }
