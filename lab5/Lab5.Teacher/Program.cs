@@ -7,6 +7,8 @@ using Microsoft.Extensions.Options;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.Services.ConfigureHttpJsonOptions(json => ContractJson.Configure(json.SerializerOptions));
+
 builder.Services.AddOptions<TeacherOptions>()
     .BindConfiguration(TeacherOptions.SectionName)
     .ValidateDataAnnotations();

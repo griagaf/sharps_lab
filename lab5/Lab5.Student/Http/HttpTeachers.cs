@@ -8,12 +8,6 @@ namespace Lab5.Student.Http;
 // У каждого предмета свой именованный HttpClient с адресом его преподавателя.
 public class HttpTeachers : ITeachers
 {
-    // Без этого ответ {} молча разобрался бы как Asked = false — «не спросили».
-    private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
-    {
-        RespectRequiredConstructorParameters = true,
-    };
-
     private readonly IHttpClientFactory _httpClientFactory;
 
     public HttpTeachers(IHttpClientFactory httpClientFactory)
@@ -69,7 +63,7 @@ public class HttpTeachers : ITeachers
     {
         try
         {
-            return await content.ReadFromJsonAsync<LessonResponse>(JsonOptions, cancellationToken);
+            return await content.ReadFromJsonAsync<LessonResponse>(ContractJson.Options, cancellationToken);
         }
         catch (InvalidOperationException e)
         {

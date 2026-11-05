@@ -24,7 +24,7 @@ public class HttpHistoryClient : IHistoryClient
 
         response.EnsureSuccessStatusCode();
 
-        LessonRecord record = await response.Content.ReadFromJsonAsync<LessonRecord>(cancellationToken)
+        LessonRecord record = await response.Content.ReadFromJsonAsync<LessonRecord>(ContractJson.Options, cancellationToken)
             ?? throw new HttpRequestException($"История вернула пустой ответ для {lesson}");
 
         return record.Asked;
