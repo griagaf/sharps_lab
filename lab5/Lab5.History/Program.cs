@@ -6,4 +6,6 @@ builder.Services.AddSingleton<IHistoryStore, InMemoryHistoryStore>();
 
 WebApplication app = builder.Build();
 
+app.MapHistoryEndpoints();
+
 app.Run();
