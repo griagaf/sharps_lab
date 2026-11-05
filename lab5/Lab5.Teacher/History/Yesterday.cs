@@ -29,6 +29,6 @@ public class Yesterday : IYesterday
         // Студент начинает день только после того, как прошли все пары предыдущего,
         // поэтому отсутствие записи означает, что вчерашний день так и не был проведён.
         return await _history.FindAskedAsync(lesson, cancellationToken)
-            ?? throw new InvalidOperationException($"В Истории нет записи о паре {lesson}");
+            ?? throw new HistoryException($"В Истории нет записи о паре {lesson}: вчерашний день не был проведён");
     }
 }
