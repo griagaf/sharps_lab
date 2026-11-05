@@ -9,8 +9,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOptions<TeacherOptions>()
     .BindConfiguration(TeacherOptions.SectionName)
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
+    .ValidateDataAnnotations();
 
 builder.Services.AddSingleton<IRandomSource, SystemRandomSource>();
 builder.Services.AddSingleton<TeacherRuleGenerator>();
@@ -27,8 +26,37 @@ WebApplication app = builder.Build();
 
 app.MapLessonEndpoints();
 
-TeacherOptions options = app.Services.GetRequiredService<IOptions<TeacherOptions>>().Value;
+TeacherOptions options;
+
+try
+{
+    options = app.Services.GetRequiredService<IOptions<TeacherOptions>>().Value;
+}
+catch (OptionsValidationException e)
+{
+    PrintInvalidSettings(e.Failures);
+    return 1;
+}
+// Значение не разобралось в нужный тип, например Subject=Chemistry.
+catch (InvalidOperationException e)
+{
+    PrintInvalidSettings([e.Message]);
+    return 1;
+}
+
 ITeacherRule rule = app.Services.GetRequiredService<ITeacherRule>();
 app.Logger.LogInformation("Предмет «{Subject}», правило: {Rule}", Subjects.GetName(options.Subject!.Value), rule.Description);
 
 app.Run();
+
+return 0;
+
+static void PrintInvalidSettings(IEnumerable<string> problems)
+{
+    Console.Error.WriteLine("Неверные настройки преподавателя (appsettings.json, переменные окружения или аргументы запуска):");
+
+    foreach (string problem in problems)
+    {
+        Console.Error.WriteLine($"  {problem}");
+    }
+}
