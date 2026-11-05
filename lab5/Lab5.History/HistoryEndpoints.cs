@@ -5,12 +5,10 @@ namespace Lab5.History;
 
 public static class HistoryEndpoints
 {
-    private const string LessonRoute = "/semesters/{semesterId:guid}/days/{day:int}/subjects/{subject}";
-
     public static IEndpointRouteBuilder MapHistoryEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPut(LessonRoute, SaveLesson);
-        endpoints.MapGet(LessonRoute, FindLesson);
+        endpoints.MapPut(HistoryRoutes.Lesson, SaveLesson);
+        endpoints.MapGet(HistoryRoutes.Lesson, FindLesson);
 
         return endpoints;
     }

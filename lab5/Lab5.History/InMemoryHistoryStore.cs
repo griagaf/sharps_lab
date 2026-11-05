@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Lab5.Contracts;
 
 namespace Lab5.History;
 

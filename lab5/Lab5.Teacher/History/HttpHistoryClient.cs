@@ -15,7 +15,7 @@ public class HttpHistoryClient : IHistoryClient
 
     public async Task<bool?> FindAskedAsync(LessonKey lesson, CancellationToken cancellationToken)
     {
-        using HttpResponseMessage response = await _http.GetAsync(GetLessonUri(lesson), cancellationToken);
+        using HttpResponseMessage response = await _http.GetAsync(HistoryRoutes.ForLesson(lesson), cancellationToken);
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
@@ -33,13 +33,8 @@ public class HttpHistoryClient : IHistoryClient
     public async Task SaveAsync(LessonKey lesson, bool asked, CancellationToken cancellationToken)
     {
         using HttpResponseMessage response = await _http.PutAsJsonAsync(
-            GetLessonUri(lesson), new LessonRecord(asked), cancellationToken);
+            HistoryRoutes.ForLesson(lesson), new LessonRecord(asked), cancellationToken);
 
         response.EnsureSuccessStatusCode();
-    }
-
-    private static string GetLessonUri(LessonKey lesson)
-    {
-        return $"semesters/{lesson.SemesterId}/days/{lesson.Day}/subjects/{lesson.Subject}";
     }
 }

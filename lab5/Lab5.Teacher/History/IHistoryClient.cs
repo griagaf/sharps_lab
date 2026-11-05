@@ -1,3 +1,5 @@
+using Lab5.Contracts;
+
 namespace Lab5.Teacher.History;
 
 public interface IHistoryClient
