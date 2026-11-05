@@ -50,7 +50,14 @@ public class HttpTeachers : ITeachers
     private static async Task<bool> SendAsync(HttpClient http, LessonRequest request, CancellationToken cancellationToken)
     {
         using HttpResponseMessage response = await http.PostAsJsonAsync(TeacherRoutes.Lessons, request, cancellationToken);
-        response.EnsureSuccessStatusCode();
+
+        if (!response.IsSuccessStatusCode)
+        {
+            string? detail = await ReadProblemDetailAsync(response.Content, cancellationToken);
+            string status = $"{(int)response.StatusCode} ({response.ReasonPhrase})";
+
+            throw new HttpRequestException(detail is null ? status : $"{status} — {detail}", null, response.StatusCode);
+        }
 
         LessonResponse lesson = await ReadLessonAsync(response.Content, cancellationToken)
             ?? throw new HttpRequestException("пустой ответ");
@@ -71,4 +78,20 @@ public class HttpTeachers : ITeachers
             throw new JsonException(e.Message, e);
         }
     }
+
+    /// <returns>Причина ошибки из ProblemDetails или null, если тело другое.</returns>
+    private static async Task<string?> ReadProblemDetailAsync(HttpContent content, CancellationToken cancellationToken)
+    {
+        try
+        {
+            ProblemDetailsBody? problem = await content.ReadFromJsonAsync<ProblemDetailsBody>(cancellationToken);
+            return string.IsNullOrWhiteSpace(problem?.Detail) ? null : problem.Detail;
+        }
+        catch (Exception e) when (e is JsonException or InvalidOperationException)
+        {
+            return null;
+        }
+    }
+
+    private record ProblemDetailsBody(string? Detail);
 }
