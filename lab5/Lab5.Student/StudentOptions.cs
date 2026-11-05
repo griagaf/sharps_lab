@@ -21,9 +21,16 @@ public class StudentOptions : IValidatableObject
             yield return new ValidationResult("День должен длиться больше нуля", [nameof(DayInterval)]);
         }
 
-        foreach (Subject subject in Subjects.All.Where(subject => !Teachers.ContainsKey(subject)))
+        foreach (Subject subject in Subjects.All)
         {
-            yield return new ValidationResult($"Не задан адрес преподавателя предмета {subject}", [nameof(Teachers)]);
+            if (!Teachers.TryGetValue(subject, out Uri? url))
+            {
+                yield return new ValidationResult($"Не задан адрес преподавателя предмета {subject}", [nameof(Teachers)]);
+            }
+            else if (!url.IsAbsoluteUri)
+            {
+                yield return new ValidationResult($"Адрес преподавателя предмета {subject} должен быть полным: «{url}»", [nameof(Teachers)]);
+            }
         }
     }
 }

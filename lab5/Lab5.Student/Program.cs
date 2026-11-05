@@ -20,8 +20,7 @@ HostApplicationBuilder builder = Host.CreateApplicationBuilder(new HostApplicati
 
 builder.Services.AddOptions<StudentOptions>()
     .BindConfiguration(StudentOptions.SectionName)
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
+    .ValidateDataAnnotations();
 
 builder.Services.AddSingleton<ISkipStrategy, EvenDaysStrategy>();
 
@@ -39,6 +38,24 @@ builder.Services.AddHostedService<SimulationWorker>();
 builder.Services.AddHostedService<KeyPressWorker>();
 
 IHost host = builder.Build();
+ConsoleReporter reporter = host.Services.GetRequiredService<ConsoleReporter>();
+
+try
+{
+    _ = host.Services.GetRequiredService<IOptions<StudentOptions>>().Value;
+}
+catch (OptionsValidationException e)
+{
+    reporter.PrintInvalidSettings(e.Failures);
+    return 1;
+}
+// Значение не разобралось в нужный тип, например DayInterval=abc.
+catch (InvalidOperationException e)
+{
+    reporter.PrintInvalidSettings([e.Message]);
+    return 1;
+}
+
 host.Run();
 
 return Environment.ExitCode;

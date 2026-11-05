@@ -62,6 +62,17 @@ public class ConsoleReporter
         Console.Error.WriteLine("Запущены ли сервисы? docker compose -f lab5/docker-compose.yml up -d --build");
     }
 
+    public void PrintInvalidSettings(IEnumerable<string> problems)
+    {
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("Неверные настройки студента (appsettings.json или аргументы запуска):");
+
+        foreach (string problem in problems)
+        {
+            Console.Error.WriteLine($"  {problem}");
+        }
+    }
+
     public void PrintUnexpectedError(Exception e)
     {
         Console.Error.WriteLine();
