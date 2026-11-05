@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="Lab5.Contracts/Lab5.Contracts.csproj" />
   <Project Path="Lab5.History/Lab5.History.csproj" />
+  <Project Path="Lab5.Student/Lab5.Student.csproj" />
   <Project Path="Lab5.Teacher/Lab5.Teacher.csproj" />
 </Solution>
