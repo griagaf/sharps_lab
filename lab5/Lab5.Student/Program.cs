@@ -31,6 +31,7 @@ foreach (Subject subject in Subjects.All)
 }
 
 builder.Services.AddSingleton<ITeachers, HttpTeachers>();
+builder.Services.AddSingleton<SemesterSessionFactory>();
 
 IHost host = builder.Build();
 host.Run();
