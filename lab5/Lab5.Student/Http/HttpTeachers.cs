@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text.Json;
 using Lab5.Contracts;
 using Lab5.Student.Simulation;
 
@@ -7,6 +8,12 @@ namespace Lab5.Student.Http;
 // У каждого предмета свой именованный HttpClient с адресом его преподавателя.
 public class HttpTeachers : ITeachers
 {
+    // Без этого ответ {} молча разобрался бы как Asked = false — «не спросили».
+    private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
+    {
+        RespectRequiredConstructorParameters = true,
+    };
+
     private readonly IHttpClientFactory _httpClientFactory;
 
     public HttpTeachers(IHttpClientFactory httpClientFactory)
@@ -19,7 +26,7 @@ public class HttpTeachers : ITeachers
         return $"teacher-{subject}";
     }
 
-    /// <exception cref="HttpRequestException">Преподаватель недоступен, ответил ошибкой или не ответил вовремя.</exception>
+    /// <exception cref="HttpRequestException">Преподаватель недоступен, ответил ошибкой, непонятно или не вовремя.</exception>
     public async Task<bool> HoldLessonAsync(Subject subject, LessonRequest request, CancellationToken cancellationToken)
     {
         HttpClient http = _httpClientFactory.CreateClient(GetClientName(subject));
@@ -34,6 +41,11 @@ public class HttpTeachers : ITeachers
             // Сама причина (отказ в соединении, обрыв) лежит во вложенном исключении.
             throw new HttpRequestException($"{teacher}: {e.GetBaseException().Message}", e, e.StatusCode);
         }
+        // Ответ пришёл, но это не LessonResponse.
+        catch (JsonException e)
+        {
+            throw new HttpRequestException($"{teacher} прислал непонятный ответ: {e.Message}", e);
+        }
         catch (TaskCanceledException e) when (!cancellationToken.IsCancellationRequested)
         {
             // Таймаут HttpClient выглядит как отмена, хотя её никто не просил.
@@ -46,9 +58,23 @@ public class HttpTeachers : ITeachers
         using HttpResponseMessage response = await http.PostAsJsonAsync(TeacherRoutes.Lessons, request, cancellationToken);
         response.EnsureSuccessStatusCode();
 
-        LessonResponse lesson = await response.Content.ReadFromJsonAsync<LessonResponse>(cancellationToken)
+        LessonResponse lesson = await ReadLessonAsync(response.Content, cancellationToken)
             ?? throw new HttpRequestException("пустой ответ");
 
         return lesson.Asked;
+    }
+
+    /// <exception cref="JsonException">Битый JSON, не тот объект или неизвестная кодировка.</exception>
+    private static async Task<LessonResponse?> ReadLessonAsync(HttpContent content, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await content.ReadFromJsonAsync<LessonResponse>(JsonOptions, cancellationToken);
+        }
+        catch (InvalidOperationException e)
+        {
+            // Так ReadFromJsonAsync сообщает о неизвестном charset в Content-Type.
+            throw new JsonException(e.Message, e);
+        }
     }
 }
