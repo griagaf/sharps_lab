@@ -24,8 +24,13 @@ builder.Services.AddHttpClient<IHistoryClient, HttpHistoryClient>((services, htt
 
 builder.Services.AddTransient<Lecturer>();
 
+// Ошибки отдаются как ProblemDetails: сбой Истории — 502, всё остальное — 500.
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<HistoryExceptionHandler>();
+
 WebApplication app = builder.Build();
 
+app.UseExceptionHandler();
 app.MapLessonEndpoints();
 
 TeacherOptions options;
