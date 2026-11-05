@@ -1,6 +1,7 @@
 using System.Text;
 using Lab5.Contracts;
 using Lab5.Student;
+using Lab5.Student.Hosting;
 using Lab5.Student.Http;
 using Lab5.Student.Simulation;
 using Lab5.Student.Students;
@@ -32,6 +33,12 @@ foreach (Subject subject in Subjects.All)
 
 builder.Services.AddSingleton<ITeachers, HttpTeachers>();
 builder.Services.AddSingleton<SemesterSessionFactory>();
+builder.Services.AddSingleton<ConsoleReporter>();
+
+builder.Services.AddHostedService<SimulationWorker>();
+builder.Services.AddHostedService<KeyPressWorker>();
 
 IHost host = builder.Build();
 host.Run();
+
+return Environment.ExitCode;

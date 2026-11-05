@@ -19,15 +19,35 @@ public class HttpTeachers : ITeachers
         return $"teacher-{subject}";
     }
 
+    /// <exception cref="HttpRequestException">Преподаватель недоступен, ответил ошибкой или не ответил вовремя.</exception>
     public async Task<bool> HoldLessonAsync(Subject subject, LessonRequest request, CancellationToken cancellationToken)
     {
         HttpClient http = _httpClientFactory.CreateClient(GetClientName(subject));
+        string teacher = $"Преподаватель «{Subjects.GetName(subject)}» ({http.BaseAddress})";
 
+        try
+        {
+            return await SendAsync(http, request, cancellationToken);
+        }
+        catch (HttpRequestException e)
+        {
+            // Сама причина (отказ в соединении, обрыв) лежит во вложенном исключении.
+            throw new HttpRequestException($"{teacher}: {e.GetBaseException().Message}", e, e.StatusCode);
+        }
+        catch (TaskCanceledException e) when (!cancellationToken.IsCancellationRequested)
+        {
+            // Таймаут HttpClient выглядит как отмена, хотя её никто не просил.
+            throw new HttpRequestException($"{teacher} не ответил за {http.Timeout.TotalSeconds} с", e);
+        }
+    }
+
+    private static async Task<bool> SendAsync(HttpClient http, LessonRequest request, CancellationToken cancellationToken)
+    {
         using HttpResponseMessage response = await http.PostAsJsonAsync(TeacherRoutes.Lessons, request, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         LessonResponse lesson = await response.Content.ReadFromJsonAsync<LessonResponse>(cancellationToken)
-            ?? throw new HttpRequestException($"Преподаватель предмета {subject} вернул пустой ответ");
+            ?? throw new HttpRequestException("пустой ответ");
 
         return lesson.Asked;
     }
