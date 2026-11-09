@@ -26,9 +26,9 @@ services:
       - "5672:5672"
       # Веб-интерфейс: http://localhost:15672, логин и пароль из .env.
       - "15672:15672"
-    # Брокер поднимается несколько секунд, сервисы ждут, пока он ответит.
+    # Брокер поднимается несколько секунд, сервисы ждут, пока он начнёт принимать подключения.
     healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity" ]
       interval: 5s
       timeout: 5s
       retries: 10
