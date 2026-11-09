@@ -19,6 +19,10 @@ public class TeacherOptions : IValidatableObject
     [Required]
     public Uri? BrokerUrl { get; set; }
 
+    /// <summary>Сколько ждать подтверждения брокера, прежде чем считать, что пара не записана.</summary>
+    [Range(typeof(TimeSpan), "00:00:01", "00:01:00", ErrorMessage = "PublishTimeout должен быть от 1 секунды до 1 минуты")]
+    public TimeSpan PublishTimeout { get; set; } = TimeSpan.FromSeconds(5);
+
     // Вызывается, только если прошли [Required], поэтому все значения уже есть.
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
