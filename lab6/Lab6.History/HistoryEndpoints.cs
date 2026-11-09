@@ -8,24 +8,9 @@ public static class HistoryEndpoints
 {
     public static IEndpointRouteBuilder MapHistoryEndpoints(this IEndpointRouteBuilder endpoints)
     {
-        endpoints.MapPut(HistoryRoutes.Lesson, SaveLesson);
         endpoints.MapGet(HistoryRoutes.Lesson, FindLesson);
 
         return endpoints;
-    }
-
-    private static Results<NoContent, BadRequest<string>> SaveLesson(
-        Guid semesterId, int day, Subject subject, LessonRecord record, IHistoryStore store)
-    {
-        string? error = LessonValidation.Validate(day, subject);
-
-        if (error is not null)
-        {
-            return TypedResults.BadRequest(error);
-        }
-
-        store.Save(new LessonKey(semesterId, day, subject), record.Asked);
-        return TypedResults.NoContent();
     }
 
     // Записи приходят из очереди с задержкой, поэтому отсутствующую пару сначала ждём и только потом отвечаем 404.

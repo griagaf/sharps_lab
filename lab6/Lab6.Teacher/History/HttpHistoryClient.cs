@@ -27,22 +27,6 @@ public class HttpHistoryClient : IHistoryClient
         }
     }
 
-    /// <exception cref="HistoryException">История недоступна, ответила ошибкой или не вовремя.</exception>
-    public async Task SaveAsync(LessonKey lesson, bool asked, CancellationToken cancellationToken)
-    {
-        try
-        {
-            using HttpResponseMessage response = await _http.PutAsJsonAsync(
-                HistoryRoutes.ForLesson(lesson), new LessonRecord(asked), cancellationToken);
-
-            response.EnsureSuccessStatusCode();
-        }
-        catch (Exception e) when (IsHistoryFailure(e, cancellationToken))
-        {
-            throw new HistoryException($"Не удалось записать в Историю {lesson}: {Describe(e)}", e);
-        }
-    }
-
     private async Task<bool?> FindAskedCoreAsync(LessonKey lesson, CancellationToken cancellationToken)
     {
         using HttpResponseMessage response = await _http.GetAsync(HistoryRoutes.ForLesson(lesson), cancellationToken);
