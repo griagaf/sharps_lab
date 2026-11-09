@@ -14,6 +14,7 @@ x-teacher: &teacher
 
 x-teacher-env: &teacher-env
   Teacher__HistoryUrl: http://history:8080
+  Teacher__BrokerUrl: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
 
 services:
   rabbitmq:

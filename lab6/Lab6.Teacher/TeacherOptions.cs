@@ -15,7 +15,11 @@ public class TeacherOptions : IValidatableObject
     [Required]
     public Uri? HistoryUrl { get; set; }
 
-    // Вызывается, только если прошли [Required], поэтому оба значения уже есть.
+    /// <summary>Адрес RabbitMQ вместе с логином и паролем, например amqp://user:pass@host:5672.</summary>
+    [Required]
+    public Uri? BrokerUrl { get; set; }
+
+    // Вызывается, только если прошли [Required], поэтому все значения уже есть.
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (!Enum.IsDefined(Subject!.Value))
@@ -26,6 +30,11 @@ public class TeacherOptions : IValidatableObject
         if (!HistoryUrl!.IsAbsoluteUri)
         {
             yield return new ValidationResult($"Адрес Истории должен быть полным: «{HistoryUrl}»", [nameof(HistoryUrl)]);
+        }
+
+        if (!BrokerUrl!.IsAbsoluteUri || BrokerUrl.Scheme is not ("amqp" or "amqps"))
+        {
+            yield return new ValidationResult($"Адрес RabbitMQ должен быть вида amqp://…: «{BrokerUrl}»", [nameof(BrokerUrl)]);
         }
     }
 }
