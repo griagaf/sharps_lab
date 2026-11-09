@@ -30,9 +30,9 @@ builder.Services.AddSingleton<ILessonPublisher>(services => services.GetRequired
 
 builder.Services.AddTransient<Lecturer>();
 
-// Ошибки отдаются как ProblemDetails: сбой Истории — 502, всё остальное — 500.
+// Ошибки отдаются как ProblemDetails: сбой Истории или брокера — 502, всё остальное — 500.
 builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<HistoryExceptionHandler>();
+builder.Services.AddExceptionHandler<DependencyExceptionHandler>();
 
 WebApplication app = builder.Build();
 

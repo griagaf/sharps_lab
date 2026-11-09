@@ -100,6 +100,8 @@ public sealed class RabbitLessonPublisher : ILessonPublisher, IAsyncDisposable
         {
             OperationCanceledException => $"брокер не ответил за {_publishTimeout.TotalSeconds} с",
             PublishException => "брокер не принял сообщение",
+            // Брокер остановлен или связь оборвалась. Клиент переподключится сам, когда брокер вернётся.
+            AlreadyClosedException => "нет соединения с брокером",
             // Сама причина (например, брокер недоступен) лежит во вложенном исключении.
             _ => e.GetBaseException().Message,
         };
