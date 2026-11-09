@@ -20,7 +20,7 @@ public class InMemoryHistoryStore : IHistoryStore
         }
     }
 
-    public bool? Find(LessonKey lesson)
+    private bool? Find(LessonKey lesson)
     {
         return _lessons.TryGetValue(lesson, out bool asked) ? asked : null;
     }

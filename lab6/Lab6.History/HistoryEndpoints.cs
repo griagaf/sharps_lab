@@ -1,5 +1,6 @@
 using Lab6.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Options;
 
 namespace Lab6.History;
 
@@ -27,8 +28,14 @@ public static class HistoryEndpoints
         return TypedResults.NoContent();
     }
 
-    private static Results<Ok<LessonRecord>, NotFound, BadRequest<string>> FindLesson(
-        Guid semesterId, int day, Subject subject, IHistoryStore store)
+    // Записи приходят из очереди с задержкой, поэтому отсутствующую пару сначала ждём и только потом отвечаем 404.
+    private static async Task<Results<Ok<LessonRecord>, NotFound, BadRequest<string>>> FindLesson(
+        Guid semesterId,
+        int day,
+        Subject subject,
+        IHistoryStore store,
+        IOptions<HistoryOptions> options,
+        CancellationToken cancellationToken)
     {
         string? error = Validate(day, subject);
 
@@ -37,7 +44,8 @@ public static class HistoryEndpoints
             return TypedResults.BadRequest(error);
         }
 
-        bool? asked = store.Find(new LessonKey(semesterId, day, subject));
+        bool? asked = await store.WaitAsync(
+            new LessonKey(semesterId, day, subject), options.Value.ReadTimeout, cancellationToken);
 
         return asked is null
             ? TypedResults.NotFound()
