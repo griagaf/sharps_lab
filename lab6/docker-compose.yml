@@ -19,11 +19,11 @@ services:
   rabbitmq:
     image: rabbitmq:4-management
     environment:
-      RABBITMQ_DEFAULT_USER: lab6
-      RABBITMQ_DEFAULT_PASS: lab6
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?задайте RABBITMQ_USER в lab6/.env, образец в .env.example}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?задайте RABBITMQ_PASSWORD в lab6/.env, образец в .env.example}
     ports:
       - "5672:5672"
-      # Веб-интерфейс: http://localhost:15672, логин и пароль lab6.
+      # Веб-интерфейс: http://localhost:15672, логин и пароль из .env.
       - "15672:15672"
     # Брокер поднимается несколько секунд, сервисы ждут, пока он ответит.
     healthcheck:
@@ -41,7 +41,7 @@ services:
       rabbitmq:
         condition: service_healthy
     environment:
-      History__BrokerUrl: amqp://lab6:lab6@rabbitmq:5672
+      History__BrokerUrl: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
     ports:
       - "5100:8080"
 
