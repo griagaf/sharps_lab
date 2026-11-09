@@ -1,0 +1,95 @@
+# RabbitMQ, История и 6 преподавателей. Студент запускается отдельно: dotnet run --project lab6/Lab6.Student
+
+# Общее для всех преподавателей: один образ, отличаются только предметом и портом.
+x-teacher: &teacher
+  build:
+    context: .
+    dockerfile: Lab6.Teacher/Dockerfile
+  image: lab6-teacher
+  depends_on:
+    history:
+      condition: service_started
+    rabbitmq:
+      condition: service_healthy
+
+x-teacher-env: &teacher-env
+  Teacher__HistoryUrl: http://history:8080
+  Teacher__BrokerUrl: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+
+services:
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?задайте RABBITMQ_USER в lab6/.env, образец в .env.example}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?задайте RABBITMQ_PASSWORD в lab6/.env, образец в .env.example}
+    ports:
+      - "5672:5672"
+      # Веб-интерфейс: http://localhost:15672, логин и пароль из .env.
+      - "15672:15672"
+    # Брокер поднимается несколько секунд, сервисы ждут, пока он начнёт принимать подключения.
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  history:
+    build:
+      context: .
+      dockerfile: Lab6.History/Dockerfile
+    image: lab6-history
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      History__BrokerUrl: amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@rabbitmq:5672
+    ports:
+      - "5100:8080"
+
+  teacher-calculus:
+    <<: *teacher
+    environment:
+      <<: *teacher-env
+      Teacher__Subject: Calculus
+    ports:
+      - "5101:8080"
+
+  teacher-linear-algebra:
+    <<: *teacher
+    environment:
+      <<: *teacher-env
+      Teacher__Subject: LinearAlgebra
+    ports:
+      - "5102:8080"
+
+  teacher-discrete-math:
+    <<: *teacher
+    environment:
+      <<: *teacher-env
+      Teacher__Subject: DiscreteMath
+    ports:
+      - "5103:8080"
+
+  teacher-programming:
+    <<: *teacher
+    environment:
+      <<: *teacher-env
+      Teacher__Subject: Programming
+    ports:
+      - "5104:8080"
+
+  teacher-physics:
+    <<: *teacher
+    environment:
+      <<: *teacher-env
+      Teacher__Subject: Physics
+    ports:
+      - "5105:8080"
+
+  teacher-english:
+    <<: *teacher
+    environment:
+      <<: *teacher-env
+      Teacher__Subject: English
+    ports:
+      - "5106:8080"
