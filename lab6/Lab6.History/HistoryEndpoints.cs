@@ -17,7 +17,7 @@ public static class HistoryEndpoints
     private static Results<NoContent, BadRequest<string>> SaveLesson(
         Guid semesterId, int day, Subject subject, LessonRecord record, IHistoryStore store)
     {
-        string? error = Validate(day, subject);
+        string? error = LessonValidation.Validate(day, subject);
 
         if (error is not null)
         {
@@ -37,7 +37,7 @@ public static class HistoryEndpoints
         IOptions<HistoryOptions> options,
         CancellationToken cancellationToken)
     {
-        string? error = Validate(day, subject);
+        string? error = LessonValidation.Validate(day, subject);
 
         if (error is not null)
         {
@@ -50,20 +50,5 @@ public static class HistoryEndpoints
         return asked is null
             ? TypedResults.NotFound()
             : TypedResults.Ok(new LessonRecord(asked.Value));
-    }
-
-    private static string? Validate(int day, Subject subject)
-    {
-        if (day < 1)
-        {
-            return "День должен быть не меньше 1";
-        }
-
-        if (!Enum.IsDefined(subject))
-        {
-            return $"Неизвестный предмет {subject}";
-        }
-
-        return null;
     }
 }

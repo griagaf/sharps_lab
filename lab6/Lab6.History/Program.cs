@@ -11,6 +11,8 @@ builder.Services.AddOptions<HistoryOptions>()
     .BindConfiguration(HistoryOptions.SectionName)
     .ValidateDataAnnotations();
 
+builder.Services.AddHostedService<LessonQueueConsumer>();
+
 WebApplication app = builder.Build();
 
 app.MapHistoryEndpoints();
@@ -33,7 +35,7 @@ catch (InvalidOperationException e)
 
 app.Run();
 
-return 0;
+return Environment.ExitCode;
 
 static void PrintInvalidSettings(IEnumerable<string> problems)
 {
