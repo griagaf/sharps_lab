@@ -9,4 +9,8 @@ public interface IHistoryStore
 
     /// <returns>Спросили ли на паре или null, если о ней ещё ничего не записано.</returns>
     bool? Find(LessonKey lesson);
+
+    /// <summary>Как <see cref="Find"/>, но если записи ещё нет, ждёт её появления.</summary>
+    /// <returns>Спросили ли на паре или null, если запись не появилась за <paramref name="timeout"/>.</returns>
+    Task<bool?> WaitAsync(LessonKey lesson, TimeSpan timeout, CancellationToken cancellationToken);
 }
