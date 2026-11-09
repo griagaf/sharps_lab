@@ -1,4 +1,4 @@
-# История и 6 преподавателей. Студент запускается отдельно: dotnet run --project lab6/Lab6.Student
+# RabbitMQ, История и 6 преподавателей. Студент запускается отдельно: dotnet run --project lab6/Lab6.Student
 
 # Общее для всех преподавателей: один образ, отличаются только предметом и портом.
 x-teacher: &teacher
@@ -7,12 +7,31 @@ x-teacher: &teacher
     dockerfile: Lab6.Teacher/Dockerfile
   image: lab6-teacher
   depends_on:
-    - history
+    history:
+      condition: service_started
+    rabbitmq:
+      condition: service_healthy
 
 x-teacher-env: &teacher-env
   Teacher__HistoryUrl: http://history:8080
 
 services:
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: lab6
+      RABBITMQ_DEFAULT_PASS: lab6
+    ports:
+      - "5672:5672"
+      # Веб-интерфейс: http://localhost:15672, логин и пароль lab6.
+      - "15672:15672"
+    # Брокер поднимается несколько секунд, сервисы ждут, пока он ответит.
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   history:
     build:
       context: .
